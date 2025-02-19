@@ -19,9 +19,9 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
     echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
     apt-get update && apt-get install -y google-chrome-stable && rm -rf /var/lib/apt/lists/*
 
-# Hard-code ChromeDriver version for Chrome 133 (currently using version 133.0.2781.20)
-RUN echo "Using hard-coded ChromeDriver version: 133.0.2781.20" && \
-    wget -q "https://chromedriver.storage.googleapis.com/133.0.2781.20/chromedriver_linux64.zip" && \
+# Hard-code ChromeDriver version for Chrome 133 using version 133.0.2789.41
+RUN echo "Using hard-coded ChromeDriver version: 133.0.2789.41" && \
+    wget -q "https://chromedriver.storage.googleapis.com/133.0.2789.41/chromedriver_linux64.zip" && \
     unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
     rm chromedriver_linux64.zip && \
     chmod +x /usr/local/bin/chromedriver
