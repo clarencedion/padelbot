@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Accueil - PadelBot{% endblock %}
+{% block content %}
+<div class="text-center mb-4">
+  <h2>Panel de Contrôle</h2>
+</div>
+
+<!-- Animation (spinner) pour indiquer si le bot tourne -->
+<div class="d-flex justify-content-center mb-3">
+  <div class="spinner-border text-light" role="status" id="bot-spinner">
+    <span class="visually-hidden">En cours...</span>
+  </div>
+</div>
+
+<!-- Boutons Démarrer / Arrêter -->
+<div class="row justify-content-center mb-4">
+  <div class="col-md-4">
+    <form action="{{ url_for('demarrer_bot') }}" method="post" class="mb-2">
+      <button type="submit" class="btn btn-success w-100">Démarrer le bot</button>
+    </form>
+    <form action="{{ url_for('arreter_bot') }}" method="post">
+      <button type="submit" class="btn btn-danger w-100">Arrêter le bot</button>
+    </form>
+  </div>
+</div>
+
+<!-- Logs du bot -->
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="log-container" id="log-container"></div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  // Met à jour les logs toutes les 2 secondes
+  function majLogs() {
+    fetch("{{ url_for('logs') }}")
+      .then(response => response.json())
+      .then(data => {
+        const logContainer = document.getElementById("log-container");
+        logContainer.innerHTML = data.join("<br>");
+        logContainer.scrollTop = logContainer.scrollHeight;
+      })
+      .catch(err => console.error(err));
+  }
+  setInterval(majLogs, 2000);
+  majLogs();
+
+  // Vérifie si le bot est en cours d'exécution pour afficher ou cacher le spinner
+  function majStatut() {
+    fetch("{{ url_for('statut') }}")
+      .then(response => response.json())
+      .then(data => {
+        const spinner = document.getElementById("bot-spinner");
+        if (data.etat === "running") {
+          spinner.style.display = "inline-block"; // affiche le spinner
+        } else {
+          spinner.style.display = "none"; // cache le spinner
+        }
+      })
+      .catch(err => console.error(err));
+  }
+  setInterval(majStatut, 2000);
+  majStatut();
+</script>
+{% endblock %}
