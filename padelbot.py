@@ -1,6 +1,6 @@
 import time
 import datetime
-import random
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -38,6 +38,13 @@ def send_keys_retry(by_locator, text, wait, attempts=3):
     return False
 
 def login(email, password):
+    """Login to the website using credentials stored in environment variables"""
+    email = os.getenv("EMAIL")  # Load email from Replit Secrets
+    password = os.getenv("PASSWORD")  # Load password from Replit Secrets
+
+    if not email or not password:
+        raise ValueError("Missing EMAIL or PASSWORD environment variable.")
+
     driver.get("https://www.anybuddyapp.com/login?redirectUrl=%2Faccount")
     wait = WebDriverWait(driver, 10)
     

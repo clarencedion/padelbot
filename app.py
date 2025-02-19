@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from threading import Thread, Event, Lock
 import time
+import os
 import datetime
 import padelbot  # Your Selenium logic: login, check_availability, process_reservation
 
 app = Flask(__name__)
-app.secret_key = "VOTRE_CLE_SECRETE"  # Remplacez par une clé aléatoire et sécurisée
+app.secret_key = os.getenv("SECRET_KEY", "fallback-secret")  # Remplacez par une clé aléatoire et sécurisée
 
 # Variables globales pour gérer le thread du bot et les logs
 bot_thread = None
