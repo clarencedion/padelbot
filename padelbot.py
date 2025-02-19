@@ -143,9 +143,6 @@ def process_reservation():
         print("Error during reservation processing:", str(e))
 
 def main():
-    email = "clarence-dion@orange.fr"
-    password = "Claclapadel2002!"
-    login(email, password)
     clicked_slot = check_availability()
     print(f"Reservation clicked: {clicked_slot}")
     process_reservation()
