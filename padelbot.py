@@ -13,28 +13,17 @@ from dotenv import load_dotenv
 if os.getenv("REPLIT_ENV") is None:
     load_dotenv()
 
+os.environ["PATH"] += os.pathsep + "/run/current-system/sw/bin"
+
 def create_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
+    options.add_argument("--headless")  # Run headless
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--remote-debugging-port=9222")
-    
-    # Explicitly set the Chrome binary location
-    chrome_binary = "/run/current-system/sw/bin/google-chrome"
-    if not os.path.exists(chrome_binary):
-        raise Exception("Chrome binary not found at " + chrome_binary)
-    options.binary_location = chrome_binary
-
-    # Explicitly set the ChromeDriver path
-    chromedriver_path = "/run/current-system/sw/bin/chromedriver"
-    if not os.path.exists(chromedriver_path):
-        raise Exception("ChromeDriver binary not found at " + chromedriver_path)
-    
-    service = webdriver.ChromeService(executable_path=chromedriver_path)
-    return webdriver.Chrome(service=service, options=options)
+    return webdriver.Chrome(options=options)
 
 # Initialize the driver
 driver = create_driver()
