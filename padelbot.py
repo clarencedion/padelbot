@@ -15,25 +15,21 @@ if os.getenv("REPLIT_ENV") is None:
 
 def create_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")  # Use new headless mode for Chrome 109+
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-gpu")
+    options.add_argument("--headless")  # Run in headless mode
+    options.add_argument("--no-sandbox")  
+    options.add_argument("--disable-dev-shm-usage")  
+    options.add_argument("--disable-gpu")  
     options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--remote-debugging-port=9222")
-    
-    # Disable images for faster page loads
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)
-    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36")
-    
-    # Set paths for Replit
+
+    # Set paths explicitly for Replit
     chrome_path = "/run/current-system/sw/bin/google-chrome"
     chromedriver_path = "/run/current-system/sw/bin/chromedriver"
 
-    return webdriver.Chrome(executable_path=chromedriver_path, options=options)
+    service = webdriver.ChromeService(executable_path=chromedriver_path)
+    return webdriver.Chrome(service=service, options=options)
 
+# Initialize the driver
 driver = create_driver()
 
 def send_keys_retry(by_locator, text, wait, attempts=3):
