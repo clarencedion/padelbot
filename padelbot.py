@@ -7,6 +7,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException
+from dotenv import load_dotenv
+
+# Load .env only if running locally
+if os.getenv("REPLIT_ENV") is None:
+    load_dotenv()
 
 def create_driver():
     options = webdriver.ChromeOptions()
@@ -93,6 +98,15 @@ def check_availability():
 
 def process_reservation():
     wait = WebDriverWait(driver, 30)
+
+    # Load card details securely
+    card_number = os.getenv("CARD_NUMBER")
+    card_expiry = os.getenv("CARD_EXPIRY")
+    card_cvc = os.getenv("CARD_CVC")
+
+    if not card_number or not card_expiry or not card_cvc:
+        raise ValueError("Missing credit card details in environment variables.")
+    
     try:
         checkbox = wait.until(EC.element_to_be_clickable((By.ID, "checkboxConfirmation")))
         checkbox.click()
@@ -122,15 +136,12 @@ def process_reservation():
         driver.execute_script("arguments[0].value = '';", expiry_input)
         driver.execute_script("arguments[0].value = '';", cvc_input)
 
-        dummy_card = {
-            "number": "4785541004106510",
-            "expiry": "05/25",
-            "cvc": "637"
-        }
-        card_number_input.send_keys(dummy_card["number"])
-        expiry_input.send_keys(dummy_card["expiry"])
-        cvc_input.send_keys(dummy_card["cvc"])
-        print("Filled in dummy card details.")
+
+        card_number_input.send_keys(card_number)
+        expiry_input.send_keys(card_expiry)
+        cvc_input.send_keys(card_cvc)
+
+        print("Filled in credit card details.")
 
         driver.switch_to.default_content()
 

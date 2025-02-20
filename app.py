@@ -4,6 +4,11 @@ import time
 import os
 import datetime
 import padelbot  # Your Selenium logic: login, check_availability, process_reservation
+from dotenv import load_dotenv
+
+# Load .env only if running locally
+if os.getenv("REPLIT_ENV") is None:
+    load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "fallback-secret")  # Remplacez par une clé aléatoire et sécurisée
