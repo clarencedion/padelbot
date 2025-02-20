@@ -35,7 +35,7 @@ RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd
     rm chrome.deb
 
 # Install ChromeDriver 114.0.5735.90 (Matching version)
-RUN wget -q "https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/linux64/chrome-linux64.zip" && \
+RUN wget -q "https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/linux64/chromedriver-linux64.zip" && \
     unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
     rm chromedriver_linux64.zip && \
     chmod +x /usr/local/bin/chromedriver
