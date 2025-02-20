@@ -1,6 +1,7 @@
 import time
 import datetime
 import os
+import shutil
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -16,13 +17,28 @@ if os.getenv("REPLIT_ENV") is None:
 os.environ["PATH"] += os.pathsep + "/run/current-system/sw/bin"
 
 def create_driver():
+    # Append common Nix directories to PATH
+    for p in ["/run/current-system/sw/bin", "/app/.nix-profile/bin"]:
+        os.environ["PATH"] += os.pathsep + p
+
+    print("Current PATH:", os.environ["PATH"])
+    
+    # Try locating Chrome with different possible names
+    chrome_bin = shutil.which("google-chrome") or shutil.which("google-chrome-stable")
+    if chrome_bin is None:
+        raise Exception("Chrome binary not found in PATH.")
+    
+    print("Using Chrome binary at:", chrome_bin)
+    
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run headless
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--remote-debugging-port=9222")
+    options.binary_location = chrome_bin
+
     return webdriver.Chrome(options=options)
 
 # Initialize the driver
