@@ -86,10 +86,10 @@ def login(email, password):
             print("Stale element encountered while clicking login. Retrying...")
     time.sleep(0.5)
 
-def check_availability():
+def check_availability(stop_event):
     wait = WebDriverWait(driver, 10)
     preferred_times = ["18:00", "19:00", "20:00", "21:00", "22:00"]
-    while True:
+    while not stop_event.is_set():
         target_date = (datetime.date.today() + datetime.timedelta(days=5)).strftime("%d %b %Y")
         url = f"https://www.anybuddyapp.com/club-aquaboulevard-de-paris/reservation/padel?date={target_date}"
         driver.get(url)
@@ -109,6 +109,9 @@ def check_availability():
                     return time_slot
         print("No available slots at preferred times. Retrying...")
         time.sleep(2)
+    # If stop_event is set, return None to signal the bot to exit.
+    return None
+
 
 def process_reservation():
     wait = WebDriverWait(driver, 30)

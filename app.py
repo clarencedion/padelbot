@@ -28,14 +28,16 @@ def log_message(message):
     print(entry)
 
 def run_bot():
-    """Boucle principale du bot exécutée dans un thread."""
     try:
         log_message("Bot démarré. Connexion en cours...")
         padelbot.login("clarence-dion@orange.fr", "Claclapadel2002!")
         log_message("Connexion réussie.")
         while not stop_event.is_set():
             log_message("Vérification de disponibilité...")
-            clicked_slot = padelbot.check_availability()
+            clicked_slot = padelbot.check_availability(stop_event)
+            if clicked_slot is None:
+                # The stop event was set during check_availability; break the loop.
+                break
             log_message(f"Créneau réservé : {clicked_slot}")
             padelbot.process_reservation()
             log_message("Processus de réservation terminé. (Vérifiez sur le site pour confirmation)")
@@ -44,6 +46,7 @@ def run_bot():
         log_message(f"Erreur dans le bot : {str(e)}")
     finally:
         log_message("Bot arrêté.")
+
 
 @app.route("/connexion", methods=["GET", "POST"])
 def connexion():
