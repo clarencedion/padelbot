@@ -22,7 +22,7 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
 
 # Install ChromeDriver (ensure it matches the installed Chrome version)
 # For example, if Chrome 133 is installed, we might use ChromeDriver 133.0.2789.41
-RUN wget -q "https://chromedriver.storage.googleapis.com/133.0.2789.41/chromedriver_linux64.zip" && \
+RUN wget -q "https://chromedriver.storage.googleapis.com/100.0.4896.20/chromedriver_linux64.zip" && \
     unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
     rm chromedriver_linux64.zip && \
     chmod +x /usr/local/bin/chromedriver
