@@ -15,20 +15,24 @@ if os.getenv("REPLIT_ENV") is None:
 
 def create_driver():
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")  # Run in headless mode
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--remote-debugging-port=9222")
+    
+    # Explicitly set the Chrome binary location
+    chrome_binary = "/run/current-system/sw/bin/google-chrome"
+    if not os.path.exists(chrome_binary):
+        raise Exception("Chrome binary not found at " + chrome_binary)
+    options.binary_location = chrome_binary
 
-    # Explicitly set the paths as provided by Replit's Nix environment:
-    chrome_path = "/run/current-system/sw/bin/google-chrome"
+    # Explicitly set the ChromeDriver path
     chromedriver_path = "/run/current-system/sw/bin/chromedriver"
-
-    # (Optional) You can also set the binary location for Chrome:
-    options.binary_location = chrome_path
-
+    if not os.path.exists(chromedriver_path):
+        raise Exception("ChromeDriver binary not found at " + chromedriver_path)
+    
     service = webdriver.ChromeService(executable_path=chromedriver_path)
     return webdriver.Chrome(service=service, options=options)
 
