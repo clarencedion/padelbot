@@ -13,14 +13,13 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome version 100.0.4896.20
-RUN wget -q "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_100.0.4896.20-1_amd64.deb" -O chrome.deb && \
+# Install Google Chrome 114.0.5735.90 (Stable version)
+RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -O chrome.deb && \
     apt-get install -y ./chrome.deb && \
     rm chrome.deb
 
-# Install ChromeDriver (ensure it matches the installed Chrome version)
-# For example, if Chrome 133 is installed, we might use ChromeDriver 133.0.2789.41
-RUN wget -q "https://chromedriver.storage.googleapis.com/100.0.4896.20/chromedriver_linux64.zip" && \
+# Install ChromeDriver 114.0.5735.90 (Matching version)
+RUN wget -q "https://chromedriver.storage.googleapis.com/114.0.5735.90/chromedriver_linux64.zip" && \
     unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
     rm chromedriver_linux64.zip && \
     chmod +x /usr/local/bin/chromedriver
