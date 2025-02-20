@@ -116,5 +116,6 @@ def statut():
         return jsonify({"etat": "stopped"})
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))  # Default to 8000 for Koyeb
     # Expose sur 0.0.0.0 pour être accessible via Internet
     app.run(host="0.0.0.0", port=5000, debug=True)
