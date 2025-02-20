@@ -4,10 +4,7 @@ FROM python:3.10-slim
 # Install system dependencies and required libraries
 RUN apt-get update && apt-get install -y \
     wget \
-    gnupg \
     unzip \
-    curl \
-    ca-certificates \
     libnss3 \
     libxss1 \
     libappindicator3-1 \
@@ -29,16 +26,19 @@ RUN apt-get update && apt-get install -y \
     libu2f-udev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome 114.0.5735.90 (Stable version)
-RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -O chrome.deb && \
-    apt-get update && apt-get install -y ./chrome.deb && \
-    rm chrome.deb
+# Download and install Google Chrome 133.0.6943.126
+RUN wget -q "https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/linux64/chrome-linux64.zip" -O chrome-linux64.zip && \
+    unzip chrome-linux64.zip -d /opt/ && \
+    rm chrome-linux64.zip && \
+    mv /opt/chrome-linux64 /opt/chrome && \
+    ln -s /opt/chrome/chrome /usr/bin/google-chrome
 
-# Install ChromeDriver 114.0.5735.90 (Matching version)
-RUN wget -q "https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/linux64/chromedriver-linux64.zip" && \
-    unzip chromedriver_linux64.zip -d /usr/local/bin/ && \
-    rm chromedriver_linux64.zip && \
-    chmod +x /usr/local/bin/chromedriver
+# Download and install ChromeDriver 133.0.6943.126
+RUN wget -q "https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.126/linux64/chromedriver-linux64.zip" -O chromedriver-linux64.zip && \
+    unzip chromedriver-linux64.zip -d /opt/ && \
+    rm chromedriver-linux64.zip && \
+    mv /opt/chromedriver-linux64/chromedriver /usr/bin/chromedriver && \
+    chmod +x /usr/bin/chromedriver
 
 # Set environment variables for Selenium
 ENV DISPLAY=:99
