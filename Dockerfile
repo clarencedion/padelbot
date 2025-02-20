@@ -13,12 +13,10 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
-      >> /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
+# Install Google Chrome version 100.0.4896.20
+RUN wget -q "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_100.0.4896.20-1_amd64.deb" -O chrome.deb && \
+    apt-get install -y ./chrome.deb && \
+    rm chrome.deb
 
 # Install ChromeDriver (ensure it matches the installed Chrome version)
 # For example, if Chrome 133 is installed, we might use ChromeDriver 133.0.2789.41
