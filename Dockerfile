@@ -58,5 +58,12 @@ COPY . /app
 # Expose the correct port
 EXPOSE 8000
 
+# Debugging: Print installed binaries and check Chrome version
+RUN ls -lh /usr/bin | grep chrome || echo "Chrome binary is missing!"
+RUN which google-chrome || echo "Google Chrome not found in PATH!"
+RUN google-chrome --version || echo "Chrome failed to run!"
+RUN ls -lh /usr/local/bin | grep chromedriver || echo "ChromeDriver is missing!"
+
+
 # Start the application
 CMD ["python", "app.py"]
