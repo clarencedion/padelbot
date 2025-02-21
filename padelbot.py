@@ -19,32 +19,33 @@ os.environ["PATH"] += os.pathsep + "/run/current-system/sw/bin"
 
 
 def create_driver():
-    # Set correct paths for Chrome and ChromeDriver
+    # Define paths
     CHROME_BINARY_PATH = "/usr/bin/google-chrome"
     CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 
-    # Debugging: Check if Chrome and ChromeDriver exist
-    print(f"Checking if Chrome exists at {CHROME_BINARY_PATH} ...")
+    # Ensure Chrome exists
     if not os.path.exists(CHROME_BINARY_PATH):
-        raise Exception(f"Chrome binary not found at: {CHROME_BINARY_PATH}. Available PATH: {os.environ['PATH']}")
-    
-    print(f"Checking if ChromeDriver exists at {CHROMEDRIVER_PATH} ...")
+        print("🚨 Chrome is missing! Installing now...")
+        os.system("apt-get update && apt-get install -y google-chrome-stable")
+
     if not os.path.exists(CHROMEDRIVER_PATH):
-        raise Exception(f"ChromeDriver binary not found at: {CHROMEDRIVER_PATH}")
+        print("🚨 ChromeDriver is missing! Installing now...")
+        os.system("apt-get update && apt-get install -y wget unzip")
+        os.system("wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(google-chrome --version | awk '{print $3}' | cut -d. -f1)/chromedriver_linux64.zip")
+        os.system("unzip /tmp/chromedriver.zip -d /usr/local/bin/")
+        os.system("rm /tmp/chromedriver.zip")
+        os.system("chmod +x /usr/local/bin/chromedriver")
 
-    # Debugging: Print installed versions
-    try:
-        chrome_version = subprocess.check_output([CHROME_BINARY_PATH, "--version"]).decode("utf-8").strip()
-        chromedriver_version = subprocess.check_output([CHROMEDRIVER_PATH, "--version"]).decode("utf-8").strip()
-        print(f"Chrome Version: {chrome_version}")
-        print(f"ChromeDriver Version: {chromedriver_version}")
-    except Exception as e:
-        print("Error getting Chrome/ChromeDriver versions:", str(e))
+    # Print versions
+    chrome_version = subprocess.check_output([CHROME_BINARY_PATH, "--version"]).decode("utf-8").strip()
+    chromedriver_version = subprocess.check_output([CHROMEDRIVER_PATH, "--version"]).decode("utf-8").strip()
+    print(f"✅ Chrome Version: {chrome_version}")
+    print(f"✅ ChromeDriver Version: {chromedriver_version}")
 
-    # Configure Selenium options
+    # Configure Selenium
     options = webdriver.ChromeOptions()
     options.binary_location = CHROME_BINARY_PATH
-    options.add_argument("--headless")  # Required for running in Koyeb
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")

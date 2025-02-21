@@ -5,6 +5,31 @@ import os
 import datetime
 import padelbot  # Your Selenium logic: login, check_availability, process_reservation
 from dotenv import load_dotenv
+import subprocess
+
+def install_chrome():
+    """Ensure Chrome is installed in the runtime environment"""
+    chrome_path = "/usr/bin/google-chrome"
+
+    if not os.path.exists(chrome_path):
+        print("🚀 Installing Google Chrome at runtime...")
+        os.system("apt-get update && apt-get install -y wget curl gnupg unzip")
+        os.system("wget -q -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb")
+        os.system("dpkg -i /tmp/google-chrome.deb || apt-get -fy install")
+        os.system("rm /tmp/google-chrome.deb")
+    else:
+        print("✅ Google Chrome already installed")
+
+    # Verify installation
+    try:
+        chrome_version = subprocess.check_output([chrome_path, "--version"]).decode("utf-8").strip()
+        print(f"✅ Chrome Installed: {chrome_version}")
+    except Exception as e:
+        print("❌ Chrome installation failed:", str(e))
+        raise RuntimeError("Google Chrome is not installed correctly")
+
+install_chrome()  # Run this before anything else in app.py
+
 
 # Load .env only if running locally
 if os.getenv("REPLIT_ENV") is None:
