@@ -16,34 +16,41 @@ if os.getenv("REPLIT_ENV") is None:
 
 os.environ["PATH"] += os.pathsep + "/run/current-system/sw/bin"
 
+
 def create_driver():
-    # Debugging: Check if Chrome is available
-    chrome_bin = shutil.which("google-chrome") or shutil.which("chrome")
-    chromedriver_bin = shutil.which("chromedriver")
+    # Define expected binary paths
+    CHROME_BINARY_PATH = "/opt/chrome/chrome"
+    CHROMEDRIVER_PATH = "/usr/bin/chromedriver"
 
-    if chrome_bin is None:
-        raise Exception("Chrome binary not found in PATH. Available PATH: " + os.environ["PATH"])
+    # Debugging: Check if Chrome and ChromeDriver exist
+    if not os.path.exists(CHROME_BINARY_PATH):
+        raise Exception(f"Chrome binary not found at: {CHROME_BINARY_PATH}. Available PATH: {os.environ['PATH']}")
     
-    if chromedriver_bin is None:
-        raise Exception("ChromeDriver binary not found in PATH.")
+    if not os.path.exists(CHROMEDRIVER_PATH):
+        raise Exception(f"ChromeDriver not found at: {CHROMEDRIVER_PATH}")
 
-    print("Using Chrome binary at:", chrome_bin)
-    print("Using ChromeDriver at:", chromedriver_bin)
-    
-    
+    # Debugging: Print system environment variables
+    print("Current PATH:", os.environ["PATH"])
+    print("Checking Chrome version...")
+    os.system(f"{CHROME_BINARY_PATH} --version")
+
+    print("Checking ChromeDriver version...")
+    os.system(f"{CHROMEDRIVER_PATH} --version")
+
     options = webdriver.ChromeOptions()
-    options.add_argument("--headless")
+    options.binary_location = CHROME_BINARY_PATH
+    options.add_argument("--headless")  # Required for running in Koyeb
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument("--remote-debugging-port=9222")
-    options.binary_location = chrome_bin
 
-    return webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=options)
+    return driver
 
-# Initialize the driver
+# Initialize driver
 driver = create_driver()
+
 
 def send_keys_retry(by_locator, text, wait, attempts=3):
     for i in range(attempts):
