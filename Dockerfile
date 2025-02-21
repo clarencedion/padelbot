@@ -1,9 +1,11 @@
 # Use official Python slim image
 FROM python:3.10-slim
 
-# Install system dependencies and required libraries
+# Install dependencies required for Chrome
 RUN apt-get update && apt-get install -y \
     wget \
+    curl \
+    gnupg \
     unzip \
     libnss3 \
     libxss1 \
@@ -24,18 +26,20 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     xdg-utils \
     libu2f-udev \
+    libcurl4 \
+    libvulkan1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install Google Chrome
+# Install Google Chrome
 RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -O /tmp/google-chrome.deb \
-    && dpkg -i /tmp/google-chrome.deb || apt-get -fy install \
+    && dpkg -i /tmp/google-chrome.deb || apt-get install -fy \
     && rm /tmp/google-chrome.deb
 
 # Verify Chrome installation
 RUN which google-chrome
 RUN google-chrome --version
 
-# Download and install ChromeDriver
+# Install ChromeDriver
 RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1) \
     && wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
     && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
@@ -54,18 +58,15 @@ ENV PATH="/usr/local/bin:${PATH}"
 # Set working directory
 WORKDIR /app
 
-# Copy dependency file and install Python packages
+# Copy and install Python dependencies
 COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy application files
 COPY . /app
 
-# Expose the correct port
+# Expose port
 EXPOSE 8000
 
-# Set the environment variable for Flask to use port 8000
-ENV PORT=8000
-
-# Command to run your application
+# Run the application
 CMD ["python", "app.py"]
