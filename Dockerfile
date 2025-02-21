@@ -1,12 +1,13 @@
 # Use official Python slim image
 FROM python:3.10-slim
 
-# Install dependencies required for Chrome
+# Install dependencies required for Chrome & ChromeDriver
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
     gnupg \
     unzip \
+    jq \
     libnss3 \
     libxss1 \
     libappindicator3-1 \
@@ -30,21 +31,22 @@ RUN apt-get update && apt-get install -y \
     libvulkan1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome
-RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -O /tmp/google-chrome.deb \
-    && dpkg -i /tmp/google-chrome.deb || apt-get install -fy \
-    && rm /tmp/google-chrome.deb
+# Step 1: Fetch the latest ChromeDriver version
+RUN LATEST_DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r '.channels.Stable.version') && \
+    wget -q "https://storage.googleapis.com/chrome-for-testing-public/${LATEST_DRIVER_VERSION}/chromedriver/linux64/chromedriver.zip" -O /tmp/chromedriver.zip && \
+    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+    rm /tmp/chromedriver.zip && \
+    chmod +x /usr/local/bin/chromedriver
+
+# Step 2: Install Google Chrome that matches the latest ChromeDriver version
+RUN LATEST_CHROME_VERSION=$(chromedriver --version | awk '{print $2}') && \
+    wget -q "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${LATEST_CHROME_VERSION}-1_amd64.deb" -O /tmp/google-chrome.deb && \
+    dpkg -i /tmp/google-chrome.deb || apt-get install -fy && \
+    rm /tmp/google-chrome.deb
 
 # Verify Chrome installation
 RUN which google-chrome
 RUN google-chrome --version
-
-# Install ChromeDriver
-RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1) \
-    && wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
-    && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
-    && rm /tmp/chromedriver.zip \
-    && chmod +x /usr/local/bin/chromedriver
 
 # Verify ChromeDriver installation
 RUN which chromedriver
