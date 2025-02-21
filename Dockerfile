@@ -1,54 +1,60 @@
 # Use official Python slim image
 FROM python:3.10-slim
 
-# Set a working directory
-WORKDIR /app
-
-# Install dependencies required for Chrome
+# Install system dependencies and required libraries
 RUN apt-get update && apt-get install -y \
     wget \
-    curl \
-    gnupg \
     unzip \
-    fonts-liberation \
     libnss3 \
     libxss1 \
     libappindicator3-1 \
     libasound2 \
-    xdg-utils \
+    fonts-liberation \
     libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
     libgtk-3-0 \
+    libnspr4 \
     libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
-    libcups2 \
-    libdbus-1-3 \
+    xdg-utils \
+    libu2f-udev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Chrome using Google's official package (alternative approach)
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg && \
-    echo 'deb [signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
+# Download and install Google Chrome
+RUN wget -q "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" -O /tmp/google-chrome.deb \
+    && dpkg -i /tmp/google-chrome.deb || apt-get -fy install \
+    && rm /tmp/google-chrome.deb
 
 # Verify Chrome installation
-RUN google-chrome --version || echo "Google Chrome failed to install"
+RUN which google-chrome
+RUN google-chrome --version
 
-# Install ChromeDriver
+# Download and install ChromeDriver
 RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1) \
-    && wget -q "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}.0.0/chromedriver/linux64/chromedriver.zip" \
-    && unzip chromedriver.zip \
-    && mv chromedriver /usr/local/bin/ \
-    && chmod +x /usr/local/bin/chromedriver \
-    && rm chromedriver.zip
+    && wget -q "https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
+    && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
+    && rm /tmp/chromedriver.zip \
+    && chmod +x /usr/local/bin/chromedriver
+
+# Verify ChromeDriver installation
+RUN which chromedriver
+RUN chromedriver --version
 
 # Set environment variables
 ENV CHROME_BINARY="/usr/bin/google-chrome"
 ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
-ENV PATH="/usr/local/bin:/usr/bin:/bin:${PATH}"
+ENV PATH="/usr/local/bin:${PATH}"
 
-# Copy project dependencies and install Python packages
+# Set working directory
+WORKDIR /app
+
+# Copy dependency file and install Python packages
 COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -58,12 +64,8 @@ COPY . /app
 # Expose the correct port
 EXPOSE 8000
 
-# Debugging: Print installed binaries and check Chrome version
-RUN ls -lh /usr/bin | grep chrome || echo "Chrome binary is missing!"
-RUN which google-chrome || echo "Google Chrome not found in PATH!"
-RUN google-chrome --version || echo "Chrome failed to run!"
-RUN ls -lh /usr/local/bin | grep chromedriver || echo "ChromeDriver is missing!"
+# Set the environment variable for Flask to use port 8000
+ENV PORT=8000
 
-
-# Start the application
+# Command to run your application
 CMD ["python", "app.py"]

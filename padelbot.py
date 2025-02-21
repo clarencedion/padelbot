@@ -18,29 +18,30 @@ if os.getenv("REPLIT_ENV") is None:
 os.environ["PATH"] += os.pathsep + "/run/current-system/sw/bin"
 
 
+
 def create_driver():
-    # Define paths
+    # Use the correct Chrome and ChromeDriver paths
     CHROME_BINARY_PATH = "/usr/bin/google-chrome"
     CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 
-    # Ensure Chrome exists
+    # Debugging: Check if Chrome and ChromeDriver exist
+    print(f"🔍 Checking if Chrome exists at {CHROME_BINARY_PATH} ...")
     if not os.path.exists(CHROME_BINARY_PATH):
-        print("🚨 Chrome is missing! Installing now...")
-        os.system("apt-get update && apt-get install -y google-chrome-stable")
+        raise Exception(f"🚨 Chrome binary not found at: {CHROME_BINARY_PATH}. Available PATH: {os.environ['PATH']}")
 
+    print(f"🔍 Checking if ChromeDriver exists at {CHROMEDRIVER_PATH} ...")
     if not os.path.exists(CHROMEDRIVER_PATH):
-        print("🚨 ChromeDriver is missing! Installing now...")
-        os.system("apt-get update && apt-get install -y wget unzip")
-        os.system("wget -q -O /tmp/chromedriver.zip https://chromedriver.storage.googleapis.com/$(google-chrome --version | awk '{print $3}' | cut -d. -f1)/chromedriver_linux64.zip")
-        os.system("unzip /tmp/chromedriver.zip -d /usr/local/bin/")
-        os.system("rm /tmp/chromedriver.zip")
-        os.system("chmod +x /usr/local/bin/chromedriver")
+        raise Exception(f"🚨 ChromeDriver not found at: {CHROMEDRIVER_PATH}")
 
-    # Print versions
-    chrome_version = subprocess.check_output([CHROME_BINARY_PATH, "--version"]).decode("utf-8").strip()
-    chromedriver_version = subprocess.check_output([CHROMEDRIVER_PATH, "--version"]).decode("utf-8").strip()
-    print(f"✅ Chrome Version: {chrome_version}")
-    print(f"✅ ChromeDriver Version: {chromedriver_version}")
+    # Debugging: Print installed versions
+    try:
+        chrome_version = subprocess.check_output([CHROME_BINARY_PATH, "--version"]).decode("utf-8").strip()
+        chromedriver_version = subprocess.check_output([CHROMEDRIVER_PATH, "--version"]).decode("utf-8").strip()
+        print(f"✅ Chrome Installed: {chrome_version}")
+        print(f"✅ ChromeDriver Installed: {chromedriver_version}")
+    except Exception as e:
+        print("❌ Error getting Chrome/ChromeDriver versions:", str(e))
+        raise RuntimeError("Google Chrome or ChromeDriver is not installed correctly")
 
     # Configure Selenium
     options = webdriver.ChromeOptions()
@@ -56,7 +57,6 @@ def create_driver():
 
 # Initialize driver
 driver = create_driver()
-
 
 
 def send_keys_retry(by_locator, text, wait, attempts=3):
