@@ -18,25 +18,28 @@ os.environ["PATH"] += os.pathsep + "/run/current-system/sw/bin"
 
 
 def create_driver():
-    # Define expected binary paths
-    CHROME_BINARY_PATH = "/opt/chrome/chrome"
-    CHROMEDRIVER_PATH = "/usr/bin/chromedriver"
+    # Set correct paths for Chrome and ChromeDriver
+    CHROME_BINARY_PATH = "/usr/bin/google-chrome"
+    CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 
-    # Debugging: Check if Chrome and ChromeDriver exist
+    os.environ["CHROME_BINARY"] = CHROME_BINARY_PATH
+    os.environ["CHROMEDRIVER_PATH"] = CHROMEDRIVER_PATH
+
+    # Debugging: Check if files exist
     if not os.path.exists(CHROME_BINARY_PATH):
         raise Exception(f"Chrome binary not found at: {CHROME_BINARY_PATH}. Available PATH: {os.environ['PATH']}")
     
     if not os.path.exists(CHROMEDRIVER_PATH):
         raise Exception(f"ChromeDriver not found at: {CHROMEDRIVER_PATH}")
 
-    # Debugging: Print system environment variables
-    print("Current PATH:", os.environ["PATH"])
+    # Debugging: Print system versions
     print("Checking Chrome version...")
     os.system(f"{CHROME_BINARY_PATH} --version")
 
     print("Checking ChromeDriver version...")
     os.system(f"{CHROMEDRIVER_PATH} --version")
 
+    # Configure Selenium options
     options = webdriver.ChromeOptions()
     options.binary_location = CHROME_BINARY_PATH
     options.add_argument("--headless")  # Required for running in Koyeb
