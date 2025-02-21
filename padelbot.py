@@ -17,18 +17,19 @@ if os.getenv("REPLIT_ENV") is None:
 os.environ["PATH"] += os.pathsep + "/run/current-system/sw/bin"
 
 def create_driver():
-    # Append common Nix directories to PATH
-    for p in ["/run/current-system/sw/bin", "/app/.nix-profile/bin"]:
-        os.environ["PATH"] += os.pathsep + p
+    # Debugging: Check if Chrome is available
+    chrome_bin = shutil.which("google-chrome") or shutil.which("chrome")
+    chromedriver_bin = shutil.which("chromedriver")
 
-    print("Current PATH:", os.environ["PATH"])
-    
-    # Try locating Chrome with different possible names
-    chrome_bin = shutil.which("google-chrome") or shutil.which("google-chrome-stable")
     if chrome_bin is None:
-        raise Exception("Chrome binary not found in PATH.")
+        raise Exception("Chrome binary not found in PATH. Available PATH: " + os.environ["PATH"])
     
+    if chromedriver_bin is None:
+        raise Exception("ChromeDriver binary not found in PATH.")
+
     print("Using Chrome binary at:", chrome_bin)
+    print("Using ChromeDriver at:", chromedriver_bin)
+    
     
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
