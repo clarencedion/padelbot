@@ -1,57 +1,62 @@
 # Use official Python slim image
 FROM python:3.10-slim
 
-# Install dependencies
+# Set a working directory
+WORKDIR /app
+
+# Install dependencies required for Chrome
 RUN apt-get update && apt-get install -y \
     wget \
-    unzip \
     curl \
     gnupg \
-    ca-certificates \
+    unzip \
     fonts-liberation \
     libnss3 \
-    libatk1.0-0 \
+    libxss1 \
+    libappindicator3-1 \
+    libasound2 \
+    xdg-utils \
     libatk-bridge2.0-0 \
-    libcups2 \
-    libxkbcommon0 \
+    libgtk-3-0 \
     libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
-    xdg-utils \
-    libappindicator3-1 \
-    libasound2 \
+    libcups2 \
+    libdbus-1-3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome
-RUN wget -q -O chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
-    apt-get update && dpkg -i chrome.deb || apt-get -fy install && \
-    rm chrome.deb
+# Install Chrome using Google's official package (alternative approach)
+RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg && \
+    echo 'deb [signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && apt-get install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
+
+# Verify Chrome installation
+RUN google-chrome --version || echo "Google Chrome failed to install"
 
 # Install ChromeDriver
 RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1) \
     && wget -q "https://storage.googleapis.com/chrome-for-testing-public/${CHROME_VERSION}.0.0/chromedriver/linux64/chromedriver.zip" \
     && unzip chromedriver.zip \
     && mv chromedriver /usr/local/bin/ \
+    && chmod +x /usr/local/bin/chromedriver \
     && rm chromedriver.zip
 
-# Set environment variables for Chrome and ChromeDriver
+# Set environment variables
 ENV CHROME_BINARY="/usr/bin/google-chrome"
 ENV CHROMEDRIVER_PATH="/usr/local/bin/chromedriver"
-ENV PATH="/usr/local/bin:${PATH}"
+ENV PATH="/usr/local/bin:/usr/bin:/bin:${PATH}"
 
-# Set working directory
-WORKDIR /app
-
-# Copy dependency file and install Python packages
+# Copy project dependencies and install Python packages
 COPY requirements.txt /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . /app
 
-# Expose the port (if needed)
+# Expose the correct port
 EXPOSE 8000
 
-# Command to run your application
+# Start the application
 CMD ["python", "app.py"]

@@ -2,6 +2,7 @@ import time
 import datetime
 import os
 import shutil
+import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -22,22 +23,23 @@ def create_driver():
     CHROME_BINARY_PATH = "/usr/bin/google-chrome"
     CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 
-    os.environ["CHROME_BINARY"] = CHROME_BINARY_PATH
-    os.environ["CHROMEDRIVER_PATH"] = CHROMEDRIVER_PATH
-
-    # Debugging: Check if files exist
+    # Debugging: Check if Chrome and ChromeDriver exist
+    print(f"Checking if Chrome exists at {CHROME_BINARY_PATH} ...")
     if not os.path.exists(CHROME_BINARY_PATH):
         raise Exception(f"Chrome binary not found at: {CHROME_BINARY_PATH}. Available PATH: {os.environ['PATH']}")
     
+    print(f"Checking if ChromeDriver exists at {CHROMEDRIVER_PATH} ...")
     if not os.path.exists(CHROMEDRIVER_PATH):
-        raise Exception(f"ChromeDriver not found at: {CHROMEDRIVER_PATH}")
+        raise Exception(f"ChromeDriver binary not found at: {CHROMEDRIVER_PATH}")
 
-    # Debugging: Print system versions
-    print("Checking Chrome version...")
-    os.system(f"{CHROME_BINARY_PATH} --version")
-
-    print("Checking ChromeDriver version...")
-    os.system(f"{CHROMEDRIVER_PATH} --version")
+    # Debugging: Print installed versions
+    try:
+        chrome_version = subprocess.check_output([CHROME_BINARY_PATH, "--version"]).decode("utf-8").strip()
+        chromedriver_version = subprocess.check_output([CHROMEDRIVER_PATH, "--version"]).decode("utf-8").strip()
+        print(f"Chrome Version: {chrome_version}")
+        print(f"ChromeDriver Version: {chromedriver_version}")
+    except Exception as e:
+        print("Error getting Chrome/ChromeDriver versions:", str(e))
 
     # Configure Selenium options
     options = webdriver.ChromeOptions()
@@ -53,6 +55,7 @@ def create_driver():
 
 # Initialize driver
 driver = create_driver()
+
 
 
 def send_keys_retry(by_locator, text, wait, attempts=3):
